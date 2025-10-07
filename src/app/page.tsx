@@ -116,21 +116,31 @@ export default function LandingPage() {
           ></div>
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-3xl mx-auto">
-              <div className="animated-border inline-block">
-                <motion.h1 
-                  className="relative z-10 rounded-lg bg-background text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl animate-text-gradient bg-[linear-gradient(90deg,hsl(var(--chart-1)),hsl(var(--chart-2)),hsl(var(--chart-3)),hsl(var(--chart-4)),hsl(var(--chart-5)),hsl(var(--chart-1)))] bg-[200%_auto] bg-clip-text text-transparent p-2"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  QR Code-Based Vehicle and Driver Verification
-                </motion.h1>
-              </div>
+              <motion.div 
+                className="mb-6 flex justify-center"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <div className="animated-border inline-block">
+                  <div className="relative z-10 flex items-center justify-center rounded-lg bg-background p-4">
+                    <QrCode className="h-16 w-16 animate-text-gradient bg-[linear-gradient(90deg,hsl(var(--chart-1)),hsl(var(--chart-2)),hsl(var(--chart-3)),hsl(var(--chart-4)),hsl(var(--chart-5)),hsl(var(--chart-1)))] bg-[200%_auto] bg-clip-text text-transparent" />
+                  </div>
+                </div>
+              </motion.div>
+              <motion.h1 
+                className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                QR Code-Based Vehicle and Driver Verification
+              </motion.h1>
               <motion.p 
                 className="mt-6 text-lg text-muted-foreground"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
               >
                 A secure web platform for registering, verifying, and tracking
                 vehicles on the University of Ilorin campus.
@@ -139,7 +149,7 @@ export default function LandingPage() {
                 className="mt-10"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
               >
                 <Button asChild size="lg">
                   <Link href="/dashboard">Get Started</Link>
