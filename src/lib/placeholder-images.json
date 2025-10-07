@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "passport-photo",
+      "description": "A placeholder for a driver's passport photograph.",
+      "imageUrl": "https://picsum.photos/seed/1/200/200",
+      "imageHint": "person passport"
+    }
+  ]
 }
