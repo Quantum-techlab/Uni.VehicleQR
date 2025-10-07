@@ -151,9 +151,13 @@ export default function LandingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.8 }}
               >
-                <Button asChild size="lg">
-                  <Link href="/dashboard">Get Started</Link>
-                </Button>
+                <div className="animated-border inline-block">
+                  <div className="relative z-10">
+                    <Button asChild size="lg" className="bg-background text-foreground hover:bg-background/80">
+                      <Link href="/dashboard">Get Started</Link>
+                    </Button>
+                  </div>
+                </div>
               </motion.div>
             </div>
           </div>
