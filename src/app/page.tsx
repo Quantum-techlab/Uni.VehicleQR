@@ -16,6 +16,7 @@ import {
   Database,
   Wind,
   Code,
+  ArrowRight,
 } from 'lucide-react';
 import { Icons } from '@/components/icons';
 import Image from 'next/image';
@@ -54,19 +55,28 @@ const sectionVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
 };
 
+const cardVariants = {
+  initial: { y: 0, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' },
+  hover: {
+    y: -5,
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+  },
+};
+
+
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="flex min-h-dvh flex-col bg-background text-foreground">
       <motion.header 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2">
             <Icons.Logo className="h-8 w-8 text-primary" />
             <span className="hidden text-lg font-bold text-primary sm:inline-block">
-              UniIlorin VehiclePass
+              VehiclePass
             </span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
@@ -77,22 +87,16 @@ export default function LandingPage() {
               Home
             </Link>
             <Link
-              href="#about"
-              className="transition-colors hover:text-primary"
-            >
-              About
-            </Link>
-            <Link
               href="#features"
               className="transition-colors hover:text-primary"
             >
               Features
             </Link>
             <Link
-              href="#contact"
+              href="#about"
               className="transition-colors hover:text-primary"
             >
-              Contact
+              About
             </Link>
           </nav>
           <Button asChild>
@@ -111,26 +115,26 @@ export default function LandingPage() {
           viewport={{ once: true, amount: 0.2 }}
         >
            <div
-            className="absolute inset-0 bg-contain bg-center opacity-30"
+            className="absolute inset-0 bg-contain bg-center opacity-10"
             style={{ backgroundImage: "url('/security-bg.svg')" }}
           ></div>
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-3xl mx-auto">
-              <motion.div 
-                className="mb-6 flex justify-center"
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <QrCode className="h-16 w-16 animate-text-gradient bg-[linear-gradient(90deg,hsl(var(--chart-1)),hsl(var(--chart-2)),hsl(var(--chart-3)),hsl(var(--chart-4)),hsl(var(--chart-5)),hsl(var(--chart-1)))] bg-[200%_auto] bg-clip-text text-transparent" />
+              <motion.div
+                  className="mb-6 flex justify-center"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <QrCode className="h-16 w-16 text-primary" />
               </motion.div>
               <motion.h1 
-                className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl"
+                className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl font-headline"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
-                QR Code-Based Vehicle and Driver Verification
+                QR Code-Based Vehicle & Driver Verification
               </motion.h1>
               <motion.p 
                 className="mt-6 text-lg text-muted-foreground"
@@ -147,13 +151,12 @@ export default function LandingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.8 }}
               >
-                <div className="animated-border inline-block">
-                  <div className="relative z-10">
-                    <Button asChild size="lg" className="bg-background text-foreground hover:bg-background/80">
-                      <Link href="/dashboard">Get Started</Link>
-                    </Button>
-                  </div>
-                </div>
+                <Button asChild size="lg" className="group">
+                  <Link href="/dashboard">
+                    Get Started
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </Button>
               </motion.div>
             </div>
           </div>
@@ -161,7 +164,7 @@ export default function LandingPage() {
 
         <motion.section 
           id="features" 
-          className="w-full bg-card py-20 md:py-24"
+          className="w-full bg-muted/40 py-20 md:py-24"
           variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
@@ -169,7 +172,7 @@ export default function LandingPage() {
         >
           <div className="container mx-auto px-4">
             <div className="mx-auto mb-12 max-w-2xl text-center">
-              <h2 className="text-3xl font-bold text-primary sm:text-4xl">
+              <h2 className="text-3xl font-bold text-primary sm:text-4xl font-headline">
                 Core Features
               </h2>
               <p className="mt-4 text-muted-foreground">
@@ -180,15 +183,17 @@ export default function LandingPage() {
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  transition={{ type: 'spring', stiffness: 300 }}
+                  variants={cardVariants}
+                  initial="initial"
+                  whileHover="hover"
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
                 >
                   <Card
-                    className="h-full transform-gpu transition-all duration-300 hover:shadow-xl bg-background"
+                    className="h-full transform-gpu bg-background"
                   >
                     <CardHeader className="items-center text-center">
                       {feature.icon}
-                      <CardTitle className="mt-4">{feature.title}</CardTitle>
+                      <CardTitle className="mt-4 font-headline">{feature.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-center text-muted-foreground">
@@ -212,7 +217,7 @@ export default function LandingPage() {
         >
             <div className="container mx-auto grid gap-12 px-4 md:grid-cols-2 md:items-center">
                 <div className="order-2 md:order-1">
-                    <h2 className="text-3xl font-bold text-primary sm:text-4xl">
+                    <h2 className="text-3xl font-bold text-primary sm:text-4xl font-headline">
                         Enhancing Campus Security
                     </h2>
                     <p className="mt-4 text-muted-foreground">
@@ -230,22 +235,22 @@ export default function LandingPage() {
 
         <motion.section
           id="tech"
-          className="w-full bg-card py-20 md:py-24"
+          className="w-full bg-muted/40 py-20 md:py-24"
           variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
         >
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold text-primary sm:text-4xl">
+            <h2 className="text-3xl font-bold text-primary sm:text-4xl font-headline">
               Powered by Modern Technology
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
               Built using a modern web stack for a fast and reliable experience.
             </p>
-            <div className="mt-10 flex flex-wrap justify-center gap-8">
+            <div className="mt-10 flex flex-wrap justify-center gap-x-12 gap-y-8">
               {techStack.map((tech, index) => (
-                <div key={index} className="flex flex-col items-center gap-2 text-foreground/80">
+                <div key={index} className="flex flex-col items-center gap-2 text-muted-foreground transition-colors hover:text-foreground">
                   {tech.icon}
                   <span className="font-semibold">{tech.name}</span>
                 </div>
