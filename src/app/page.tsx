@@ -45,14 +45,13 @@ const techStack = [
   { icon: <Database className="h-8 w-8" />, name: 'Firebase' },
   { icon: <ShieldCheck className="h-8 w-8" />, name: 'Firestore' },
   { icon: <Wind className="h-8 w-8" />, name: 'TailwindCSS' },
-  { icon: <QrCode className="h-8 w-8" />, name: 'QR Code API' },
-  { icon: <Code className="h-8 w-8" />, name: 'HTML/JS' },
+  { icon: <Code className="h-8 w-8" />, name: 'Next.js' },
 ];
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-sm">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2">
             <Icons.Logo className="h-8 w-8 text-primary" />
@@ -103,26 +102,26 @@ export default function LandingPage() {
               <h1 className="text-4xl font-extrabold tracking-tight text-primary sm:text-5xl md:text-6xl">
                 QR Code-Based Vehicle and Driver Verification
               </h1>
-              <p className="mt-6 text-lg text-gray-600">
+              <p className="mt-6 text-lg text-muted-foreground">
                 A secure web platform for registering, verifying, and tracking
                 vehicles on the University of Ilorin campus.
               </p>
               <div className="mt-10">
-                <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
-                  <Link href="/register-driver">Get Started</Link>
+                <Button asChild size="lg">
+                  <Link href="/dashboard">Get Started</Link>
                 </Button>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="features" className="w-full bg-gray-50 py-20 md:py-24">
+        <section id="features" className="w-full bg-card py-20 md:py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto mb-12 max-w-2xl text-center">
               <h2 className="text-3xl font-bold text-primary sm:text-4xl">
                 Core Features
               </h2>
-              <p className="mt-4 text-gray-600">
+              <p className="mt-4 text-muted-foreground">
                 Streamlining campus security with powerful, easy-to-use tools.
               </p>
             </div>
@@ -130,14 +129,14 @@ export default function LandingPage() {
               {features.map((feature, index) => (
                 <Card
                   key={index}
-                  className="transform-gpu transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+                  className="transform-gpu transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-background"
                 >
                   <CardHeader className="items-center text-center">
                     {feature.icon}
                     <CardTitle className="mt-4">{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-center text-gray-600">
+                    <p className="text-center text-muted-foreground">
                       {feature.description}
                     </p>
                   </CardContent>
@@ -147,16 +146,16 @@ export default function LandingPage() {
           </div>
         </section>
         
-        <section id="about" className="w-full bg-white py-20 md:py-24">
+        <section id="about" className="w-full bg-background py-20 md:py-24">
             <div className="container mx-auto grid gap-12 px-4 md:grid-cols-2 md:items-center">
                 <div className="order-2 md:order-1">
                     <h2 className="text-3xl font-bold text-primary sm:text-4xl">
                         Enhancing Campus Security
                     </h2>
-                    <p className="mt-4 text-gray-600">
+                    <p className="mt-4 text-muted-foreground">
                         The UniIlorin Vehicle Verification System is a digital solution designed to replace manual gate-pass and vehicle identification methods. By leveraging QR code technology, it provides a faster, more secure, and more reliable way to manage vehicle access on campus.
                     </p>
-                    <p className="mt-4 text-gray-600">
+                    <p className="mt-4 text-muted-foreground">
                         Our goal is to improve security operations, reduce unauthorized entry, and provide a seamless experience for both security personnel and the campus community.
                     </p>
                 </div>
@@ -168,19 +167,18 @@ export default function LandingPage() {
 
         <section
           id="tech"
-          className="w-full bg-gray-50 py-20 md:py-24"
+          className="w-full bg-card py-20 md:py-24"
         >
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold text-primary sm:text-4xl">
               Powered by Modern Technology
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-gray-600">
-              Built using Firebase Authentication, Firestore Database, and QR
-              Code APIs for fast and reliable verification.
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              Built using a modern web stack for a fast and reliable experience.
             </p>
             <div className="mt-10 flex flex-wrap justify-center gap-8">
               {techStack.map((tech, index) => (
-                <div key={index} className="flex flex-col items-center gap-2 text-gray-700">
+                <div key={index} className="flex flex-col items-center gap-2 text-foreground/80">
                   {tech.icon}
                   <span className="font-semibold">{tech.name}</span>
                 </div>
@@ -198,7 +196,7 @@ export default function LandingPage() {
           <p className="text-sm">
             © {new Date().getFullYear()} University of Ilorin
           </p>
-          <p className="mt-2 text-xs text-gray-300">
+          <p className="mt-2 text-xs text-primary-foreground/80">
             Developed by Abdulrasaq Abdulrasaq Alatare, Department of Information Technology
           </p>
         </div>
