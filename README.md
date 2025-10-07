@@ -2,7 +2,7 @@
 
 This is a secure web platform for registering, verifying, and tracking vehicles on the University of Ilorin campus. It's designed to replace manual gate-pass and vehicle identification methods with a faster, more secure, and more reliable QR code-based system.
 
-## Core Features
+# Core Features
 
 -   **Admin Dashboard**: A comprehensive overview of registered drivers, recent scans, and quick access to key functions.
 -   **Driver & Vehicle Registration**: Admins can securely register new drivers, upload necessary information like passport photos, and input vehicle details. A unique QR code is automatically generated for each registered vehicle.
