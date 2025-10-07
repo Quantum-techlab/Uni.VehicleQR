@@ -1,0 +1,18 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(128, 0, 0, 0.1)" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(242, 225, 225, 0);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgba(242, 225, 225, 0.5);stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#grid)" />
+  <rect width="800" height="600" fill="url(#grad)" />
+  <g fill="rgba(128, 0, 0, 0.15)">
+    <path transform="translate(100 100) scale(1.5)" d="M50,5A20,20,0,1,1,30,25H10a5,5,0,0,0-5,5v30a5,5,0,0,0,5,5H90a5,5,0,0,0,5-5V30a5,5,0,0,0-5-5H70A20,20,0,1,1,50,5Zm0,8a12,12,0,1,0,12,12A12,12,0,0,0,50,13ZM20,35H80V65H20Z" />
+    <path transform="translate(500 350) scale(2)" d="M45,15h10v5H45ZM35,15V10h5V20h5V10h5V20h5V10h5V20h5V10h5V20h5V10h5v5h10V5H5V65H35V40H20V35H35v5H20v5H35v5H20v5H35v5H20V35h5V30H20V25h5V20H20V15H35Zm30,50H60V60h5Zm-5,0V60h5v5Zm-5,0H50V60h5Zm-5,0V60h5v5Zm-5,0H40V60h5Zm-5,0V60h5v5ZM35,60h5v5H35Zm45,15v5H5V75H80ZM5,70H80V50H65V45H80V40H65V35H80V30H65V25H80V20H60v5h5v5H60v5h5v5H60v5h5v5H60v5h5v5H60v5h5v5H60v5H5Z"/>
+    <path transform="translate(200 450) scale(1.2) rotate(15)" d="M85,30H70V15a15,15,0,0,0-30,0V30H25a5,5,0,0,0-5,5V85a5,5,0,0,0,5,5H85a5,5,0,0,0,5-5V35A5,5,0,0,0,85,30ZM45,15a5,5,0,0,1,10,0V30H45ZM80,80H30V40H80Z"/>
+  </g>
+</svg>

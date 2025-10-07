@@ -3,6 +3,7 @@ import { AuthProvider } from '@/components/auth-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import './globals.css';
+import { Analytics } from '@genkit-ai/next/client';
 
 export const metadata: Metadata = {
   title: 'UniIlorin VehiclePass',
@@ -30,6 +31,7 @@ export default function RootLayout({
         )}
       >
         <AuthProvider>
+          <Analytics />
           {children}
           <Toaster />
         </AuthProvider>
