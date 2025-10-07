@@ -122,10 +122,8 @@ export default function LandingPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <div className="animated-border inline-block">
-                  <div className="relative z-10 flex items-center justify-center rounded-lg bg-background p-4">
-                    <QrCode className="h-16 w-16 animate-text-gradient bg-[linear-gradient(90deg,hsl(var(--chart-1)),hsl(var(--chart-2)),hsl(var(--chart-3)),hsl(var(--chart-4)),hsl(var(--chart-5)),hsl(var(--chart-1)))] bg-[200%_auto] bg-clip-text text-transparent" />
-                  </div>
+                <div className="animated-border inline-block p-4">
+                  <QrCode className="h-16 w-16 animate-text-gradient bg-[linear-gradient(90deg,hsl(var(--chart-1)),hsl(var(--chart-2)),hsl(var(--chart-3)),hsl(var(--chart-4)),hsl(var(--chart-5)),hsl(var(--chart-1)))] bg-[200%_auto] bg-clip-text text-transparent" />
                 </div>
               </motion.div>
               <motion.h1 
