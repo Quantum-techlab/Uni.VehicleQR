@@ -116,7 +116,7 @@ export default function LandingPage() {
           ></div>
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-3xl mx-auto">
-              <div className="animated-border">
+              <div className="animated-border inline-block">
                 <motion.h1 
                   className="relative z-10 rounded-lg bg-background text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl animate-text-gradient bg-[linear-gradient(90deg,hsl(var(--chart-1)),hsl(var(--chart-2)),hsl(var(--chart-3)),hsl(var(--chart-4)),hsl(var(--chart-5)),hsl(var(--chart-1)))] bg-[200%_auto] bg-clip-text text-transparent p-2"
                   initial={{ opacity: 0, y: 20 }}
