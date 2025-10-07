@@ -111,13 +111,13 @@ export default function LandingPage() {
           viewport={{ once: true, amount: 0.2 }}
         >
            <div
-            className="absolute inset-0 bg-contain bg-center opacity-10"
+            className="absolute inset-0 bg-contain bg-center opacity-20"
             style={{ backgroundImage: "url('/security-bg.svg')" }}
           ></div>
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-3xl mx-auto">
               <motion.h1 
-                className="text-4xl font-extrabold tracking-tight text-primary sm:text-5xl md:text-6xl"
+                className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl animate-text-gradient bg-[linear-gradient(90deg,hsl(var(--primary)),hsl(var(--accent)),hsl(var(--primary)))] bg-[200%_auto] bg-clip-text text-transparent"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
