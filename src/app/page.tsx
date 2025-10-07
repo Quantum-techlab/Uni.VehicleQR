@@ -115,7 +115,7 @@ export default function LandingPage() {
           viewport={{ once: true, amount: 0.2 }}
         >
            <div
-            className="absolute inset-0 bg-contain bg-center opacity-10"
+            className="absolute inset-0 bg-contain bg-center opacity-30"
             style={{ backgroundImage: "url('/security-bg.svg')" }}
           ></div>
           <div className="container mx-auto px-4 text-center">
@@ -129,7 +129,7 @@ export default function LandingPage() {
                   <QrCode className="h-16 w-16 text-primary" />
               </motion.div>
               <motion.h1 
-                className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl font-headline"
+                className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl font-headline bg-clip-text text-transparent bg-gradient-to-r from-chart-1 via-chart-3 to-chart-5 animate-text-gradient"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
@@ -228,7 +228,7 @@ export default function LandingPage() {
                     </p>
                 </div>
                  <div className="order-1 md:order-2 flex justify-center">
-                    <Image src="https://picsum.photos/seed/unilorin-gate/600/400" alt="University Gate" width={600} height={400} className="rounded-lg shadow-lg" data-ai-hint="university gate" />
+                    <Image src="https://storage.googleapis.com/aai-web-samples/public/unilorin-gate.jpg" alt="University Gate" width={600} height={400} className="rounded-lg shadow-lg" data-ai-hint="university gate" />
                 </div>
             </div>
         </motion.section>
