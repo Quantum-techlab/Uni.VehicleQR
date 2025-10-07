@@ -84,3 +84,44 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .animated-border {
+    position: relative;
+    padding: 2px;
+    border-radius: 0.75rem; /* rounded-lg */
+    overflow: hidden;
+  }
+
+  .animated-border::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+      from var(--angle),
+      hsl(var(--chart-1)),
+      hsl(var(--chart-2)),
+      hsl(var(--chart-3)),
+      hsl(var(--chart-4)),
+      hsl(var(--chart-5)),
+      hsl(var(--chart-1))
+    );
+    transform-origin: center center;
+    transform: translate(-50%, -50%);
+    animation: spin 4s linear infinite;
+  }
+
+  @property --angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  @keyframes spin {
+    from { --angle: 0deg; }
+    to { --angle: 360deg; }
+  }
+}
