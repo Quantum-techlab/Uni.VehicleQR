@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardContent,
@@ -33,8 +35,16 @@ import {
 } from 'firebase/firestore';
 import { Driver } from '@/lib/types';
 import { format } from 'date-fns';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
-async function getDashboardData() {
+type DashboardData = {
+  totalDrivers: number;
+  totalScans: number;
+  recentDrivers: Driver[];
+};
+
+async function getDashboardData(): Promise<DashboardData> {
   const driversRef = collection(db, 'drivers');
   const logsRef = collection(db, 'scan_logs');
 
@@ -57,47 +67,60 @@ async function getDashboardData() {
   return { totalDrivers, totalScans, recentDrivers };
 }
 
-export default async function DashboardPage() {
-  const { totalDrivers, totalScans, recentDrivers } = await getDashboardData();
+
+export default function DashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+
+  useEffect(() => {
+    getDashboardData().then(setData);
+  }, []);
+
+  const { totalDrivers, totalScans, recentDrivers } = data || { totalDrivers: 0, totalScans: 0, recentDrivers: [] };
 
   return (
     <div className="flex flex-col gap-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Drivers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalDrivers}</div>
-            <p className="text-xs text-muted-foreground">
-              Registered drivers in the system
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Scans</CardTitle>
-            <ScanLine className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalScans}</div>
-            <p className="text-xs text-muted-foreground">
-              Total vehicle verifications
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="flex flex-col">
-            <CardHeader>
-                <CardTitle>New Registration</CardTitle>
-                <CardDescription>Register a new driver and vehicle.</CardDescription>
+        <motion.div whileHover={{ y: -5, scale: 1.03 }}>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Drivers</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="flex-grow flex items-end">
-                <Button asChild className="w-full">
-                    <Link href="/register-driver">Register Driver</Link>
-                </Button>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalDrivers}</div>
+              <p className="text-xs text-muted-foreground">
+                Registered drivers in the system
+              </p>
             </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
+        <motion.div whileHover={{ y: -5, scale: 1.03 }}>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Scans</CardTitle>
+              <ScanLine className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalScans}</div>
+              <p className="text-xs text-muted-foreground">
+                Total vehicle verifications
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div whileHover={{ y: -5, scale: 1.03 }} className="flex">
+          <Card className="flex flex-col w-full">
+              <CardHeader>
+                  <CardTitle>New Registration</CardTitle>
+                  <CardDescription>Register a new driver and vehicle.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow flex items-end">
+                  <Button asChild className="w-full">
+                      <Link href="/register-driver">Register Driver</Link>
+                  </Button>
+              </CardContent>
+          </Card>
+        </motion.div>
       </div>
       <Card>
         <CardHeader className="flex flex-row items-center">
@@ -150,7 +173,7 @@ export default async function DashboardPage() {
                     <div className="font-medium">{driver.vehicleRegistrationNumber}</div>
                   </TableCell>
                   <TableCell className="text-right">
-                    {format(driver.registrationDate.toDate(), 'PPP')}
+                    {driver.registrationDate ? format(driver.registrationDate.toDate(), 'PPP') : 'N/A'}
                   </TableCell>
                 </TableRow>
               ))}
