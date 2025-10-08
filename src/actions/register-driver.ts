@@ -12,12 +12,12 @@ import {
   doc,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import QRCode from 'qrcode';
 
 export async function registerDriverAction(formData: FormData) {
   try {
     const data = Object.fromEntries(formData.entries());
 
+    // 1. Check for existing vehicle
     const driversRef = collection(db, 'drivers');
     const q = query(
       driversRef,
@@ -29,14 +29,14 @@ export async function registerDriverAction(formData: FormData) {
       return { error: 'A vehicle with this registration number already exists.' };
     }
 
-    // Upload passport photo
+    // 2. Upload passport photo
     const passportFile = data.passportPhoto as File;
     const passportFileBuffer = Buffer.from(await passportFile.arrayBuffer());
     const passportRef = ref(storage, `passports/${Date.now()}_${passportFile.name}`);
     await uploadBytes(passportRef, passportFileBuffer, { contentType: passportFile.type });
     const passportPhotoUrl = await getDownloadURL(passportRef);
 
-    // Create driver document by picking only the required fields
+    // 3. Create driver document (without QR code URL yet)
     const newDriverData = {
       fullName: data.fullName,
       nin: data.nin,
@@ -48,22 +48,17 @@ export async function registerDriverAction(formData: FormData) {
       vehicleColor: data.vehicleColor,
       vehicleModel: data.vehicleModel,
       passportPhotoUrl,
-      qrCodeUrl: '', // Will be updated later
+      qrCodeUrl: '', // Placeholder
       registrationDate: Timestamp.now(),
     };
 
     const docRef = await addDoc(driversRef, newDriverData);
 
-    // Generate QR code directly as a buffer
-    const qrCodeBuffer = await QRCode.toBuffer(docRef.id, { type: 'png' });
-    const qrCodeRef = ref(storage, `qrcodes/${docRef.id}.png`);
+    // 4. Generate QR code using an external API
+    const qrCodeUrlFromApi = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${docRef.id}`;
     
-    // Upload the buffer
-    await uploadBytes(qrCodeRef, qrCodeBuffer, { contentType: 'image/png' });
-    const qrCodeUrl = await getDownloadURL(qrCodeRef);
-
-    // Update driver with QR code URL
-    await updateDoc(doc(db, 'drivers', docRef.id), { qrCodeUrl });
+    // We will use the direct URL from the API instead of re-uploading
+    await updateDoc(doc(db, 'drivers', docRef.id), { qrCodeUrl: qrCodeUrlFromApi });
 
     return { driverId: docRef.id };
 
