@@ -1,3 +1,4 @@
+
 'use server';
 
 import { db, storage } from '@/lib/firebase';
@@ -48,9 +49,15 @@ export async function registerDriverAction(formData: FormData) {
   // Generate and upload QR code
   const qrCodeDataUrl = await QRCode.toDataURL(docRef.id);
   const qrCodeRef = ref(storage, `qrcodes/${docRef.id}.png`);
-  const response = await fetch(qrCodeDataUrl);
-  const blob = await response.blob();
-  await uploadBytes(qrCodeRef, blob);
+  
+  // Convert data URL to buffer to upload to Firebase Storage
+  const base64Data = qrCodeDataUrl.split(';base64,').pop();
+  if (!base64Data) {
+    return { error: 'Failed to generate QR code.' };
+  }
+  const imageBuffer = Buffer.from(base64Data, 'base64');
+  
+  await uploadBytes(qrCodeRef, imageBuffer, { contentType: 'image/png' });
   const qrCodeUrl = await getDownloadURL(qrCodeRef);
 
   // Update driver with QR code URL
