@@ -38,8 +38,8 @@ To get a local copy up and running, follow these simple steps.
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/your-username/your-repo-name.git
-    cd your-repo-name
+    git clone https://github.com/Quantum-techlab/-Uni.VehicleQR.git
+    cd -Uni.VehicleQR
     ```
 
 2.  **Install NPM packages:**
