@@ -31,7 +31,7 @@ export async function registerDriverAction(formData: FormData) {
 
     // Upload passport photo
     const passportFile = data.passportPhoto as File;
-    const passportFileBuffer = await passportFile.arrayBuffer();
+    const passportFileBuffer = Buffer.from(await passportFile.arrayBuffer());
     const passportRef = ref(storage, `passports/${Date.now()}_${passportFile.name}`);
     await uploadBytes(passportRef, passportFileBuffer, { contentType: passportFile.type });
     const passportPhotoUrl = await getDownloadURL(passportRef);
@@ -54,17 +54,12 @@ export async function registerDriverAction(formData: FormData) {
 
     const docRef = await addDoc(driversRef, newDriverData);
 
-    // Generate and upload QR code
-    const qrCodeDataUrl = await QRCode.toDataURL(docRef.id);
+    // Generate QR code directly as a buffer
+    const qrCodeBuffer = await QRCode.toBuffer(docRef.id, { type: 'png' });
     const qrCodeRef = ref(storage, `qrcodes/${docRef.id}.png`);
     
-    const base64Data = qrCodeDataUrl.split(';base64,').pop();
-    if (!base64Data) {
-      return { error: 'Failed to generate QR code data.' };
-    }
-    const imageBuffer = Buffer.from(base64Data, 'base64');
-    
-    await uploadBytes(qrCodeRef, imageBuffer, { contentType: 'image/png' });
+    // Upload the buffer
+    await uploadBytes(qrCodeRef, qrCodeBuffer, { contentType: 'image/png' });
     const qrCodeUrl = await getDownloadURL(qrCodeRef);
 
     // Update driver with QR code URL
@@ -74,6 +69,7 @@ export async function registerDriverAction(formData: FormData) {
 
   } catch (error: any) {
     console.error("Registration failed:", error);
-    return { error: error.message || 'An internal server error occurred during registration.' };
+    // Return a specific error message to help with debugging
+    return { error: `Registration failed: ${error.message || 'An internal server error occurred.'}` };
   }
 }
