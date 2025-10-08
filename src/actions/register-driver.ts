@@ -1,4 +1,3 @@
-
 'use server';
 
 import { db, storage } from '@/lib/firebase';
@@ -17,7 +16,7 @@ import QRCode from 'qrcode';
 
 export async function registerDriverAction(formData: FormData) {
   const data = Object.fromEntries(formData.entries());
-  
+
   const driversRef = collection(db, 'drivers');
   const q = query(
     driversRef,
@@ -35,14 +34,21 @@ export async function registerDriverAction(formData: FormData) {
   await uploadBytes(passportRef, passportFile);
   const passportPhotoUrl = await getDownloadURL(passportRef);
 
-  // Create driver document
+  // Create driver document by picking only the required fields
   const newDriverData = {
-    ...data,
+    fullName: data.fullName,
+    nin: data.nin,
+    phoneNumber: data.phoneNumber,
+    email: data.email,
+    address: data.address,
+    vehicleRegistrationNumber: data.vehicleRegistrationNumber,
+    vehicleType: data.vehicleType,
+    vehicleColor: data.vehicleColor,
+    vehicleModel: data.vehicleModel,
     passportPhotoUrl,
-    qrCodeUrl: '',
+    qrCodeUrl: '', // Will be updated later
     registrationDate: Timestamp.now(),
   };
-  delete (newDriverData as any).passportPhoto
 
   const docRef = await addDoc(driversRef, newDriverData);
 
@@ -53,7 +59,8 @@ export async function registerDriverAction(formData: FormData) {
   // Convert data URL to buffer to upload to Firebase Storage
   const base64Data = qrCodeDataUrl.split(';base64,').pop();
   if (!base64Data) {
-    return { error: 'Failed to generate QR code.' };
+    // This case should be rare, but it's good to handle it
+    return { error: 'Failed to generate QR code data.' };
   }
   const imageBuffer = Buffer.from(base64Data, 'base64');
   
