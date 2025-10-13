@@ -114,6 +114,11 @@ export default function LoginPage() {
             </Form>
           </CardContent>
         </Card>
+        <div className="mt-6 text-center text-sm">
+            <Link href="/" className="text-muted-foreground transition-colors hover:text-primary">
+                &larr; Back to Home
+            </Link>
+        </div>
       </div>
     </div>
   );
