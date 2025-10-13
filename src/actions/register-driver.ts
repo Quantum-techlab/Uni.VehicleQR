@@ -57,7 +57,7 @@ export async function registerDriverAction(formData: FormData) {
     // 4. Generate QR code using an external API
     const qrCodeUrlFromApi = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${docRef.id}`;
     
-    // We will use the direct URL from the API instead of re-uploading
+    // 5. Update the driver document with the QR code URL from the API
     await updateDoc(doc(db, 'drivers', docRef.id), { qrCodeUrl: qrCodeUrlFromApi });
 
     return { driverId: docRef.id };
