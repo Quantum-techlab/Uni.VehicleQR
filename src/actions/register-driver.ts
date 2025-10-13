@@ -12,6 +12,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import QRCode from 'qrcode';
 
 export async function registerDriverAction(formData: FormData) {
   try {
@@ -31,6 +32,9 @@ export async function registerDriverAction(formData: FormData) {
 
     // 2. Upload passport photo
     const passportFile = data.passportPhoto as File;
+    if (!passportFile || passportFile.size === 0) {
+        return { error: 'Passport photo is missing or empty.' };
+    }
     const passportFileBuffer = Buffer.from(await passportFile.arrayBuffer());
     const passportRef = ref(storage, `passports/${Date.now()}_${passportFile.name}`);
     await uploadBytes(passportRef, passportFileBuffer, { contentType: passportFile.type });
@@ -38,15 +42,15 @@ export async function registerDriverAction(formData: FormData) {
 
     // 3. Create driver document (without QR code URL yet)
     const newDriverData = {
-      fullName: data.fullName,
-      nin: data.nin,
-      phoneNumber: data.phoneNumber,
-      email: data.email,
-      address: data.address,
-      vehicleRegistrationNumber: data.vehicleRegistrationNumber,
-      vehicleType: data.vehicleType,
-      vehicleColor: data.vehicleColor,
-      vehicleModel: data.vehicleModel,
+      fullName: data.fullName as string,
+      nin: data.nin as string,
+      phoneNumber: data.phoneNumber as string,
+      email: data.email as string,
+      address: data.address as string,
+      vehicleRegistrationNumber: data.vehicleRegistrationNumber as string,
+      vehicleType: data.vehicleType as string,
+      vehicleColor: data.vehicleColor as string,
+      vehicleModel: data.vehicleModel as string,
       passportPhotoUrl,
       qrCodeUrl: '', // Placeholder
       registrationDate: Timestamp.now(),
@@ -54,17 +58,23 @@ export async function registerDriverAction(formData: FormData) {
 
     const docRef = await addDoc(driversRef, newDriverData);
 
-    // 4. Generate QR code using an external API
-    const qrCodeUrlFromApi = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${docRef.id}`;
-    
-    // 5. Update the driver document with the QR code URL from the API
-    await updateDoc(doc(db, 'drivers', docRef.id), { qrCodeUrl: qrCodeUrlFromApi });
+    // 4. Generate QR code image buffer and upload it
+    const qrCodeBuffer = await QRCode.toBuffer(docRef.id, { 
+        type: 'png',
+        width: 250,
+        margin: 1 
+    });
+    const qrCodeRef = ref(storage, `qrcodes/${docRef.id}.png`);
+    await uploadBytes(qrCodeRef, qrCodeBuffer, { contentType: 'image/png' });
+    const qrCodeUrl = await getDownloadURL(qrCodeRef);
+
+    // 5. Update the driver document with the final QR code URL from storage
+    await updateDoc(doc(db, 'drivers', docRef.id), { qrCodeUrl: qrCodeUrl });
 
     return { driverId: docRef.id };
 
   } catch (error: any) {
     console.error("Registration failed:", error);
-    // Return a specific error message to help with debugging
     return { error: `Registration failed: ${error.message || 'An internal server error occurred.'}` };
   }
 }
