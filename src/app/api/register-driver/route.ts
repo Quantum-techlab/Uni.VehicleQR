@@ -1,16 +1,6 @@
 import { NextResponse } from 'next/server';
-import { db, storage } from '@/lib/firebase';
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  Timestamp,
-  updateDoc,
-  doc,
-} from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '@/lib/firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore';
 import QRCode from 'qrcode';
 
 export async function POST(request: Request) {
@@ -33,21 +23,25 @@ export async function POST(request: Request) {
     }
 
     // 1. Check for existing vehicle
-    const driversRef = collection(db, 'drivers');
-    const q = query(
-      driversRef,
-      where('vehicleRegistrationNumber', '==', vehicleRegistrationNumber)
-    );
-    const querySnapshot = await getDocs(q);
+    const driversRef = db.collection('drivers');
+    const q = driversRef.where('vehicleRegistrationNumber', '==', vehicleRegistrationNumber);
+    const querySnapshot = await q.get();
     if (!querySnapshot.empty) {
       return NextResponse.json({ error: 'A vehicle with this registration number already exists.' }, { status: 409 });
     }
 
     // 2. Handle passport photo upload
     const passportFileBuffer = Buffer.from(await passportFile.arrayBuffer());
-    const passportRef = ref(storage, `passports/${Date.now()}_${passportFile.name}`);
-    await uploadBytes(passportRef, passportFileBuffer, { contentType: passportFile.type });
-    const passportPhotoUrl = await getDownloadURL(passportRef);
+    const passportFileName = `passports/${Date.now()}_${passportFile.name}`;
+    const passportFileBlob = storage.file(passportFileName);
+    await passportFileBlob.save(passportFileBuffer, {
+        metadata: { contentType: passportFile.type },
+    });
+    const [passportPhotoUrl] = await passportFileBlob.getSignedUrl({
+        action: 'read',
+        expires: '01-01-2500' // Far-future expiration date
+    });
+
 
     // 3. Create driver document (without QR code URL yet)
     const newDriverData = {
@@ -65,7 +59,7 @@ export async function POST(request: Request) {
       registrationDate: Timestamp.now(),
     };
 
-    const docRef = await addDoc(driversRef, newDriverData);
+    const docRef = await driversRef.add(newDriverData);
     const driverId = docRef.id;
 
     // 4. Generate QR code image buffer and upload it
@@ -74,12 +68,18 @@ export async function POST(request: Request) {
         width: 250,
         margin: 1 
     });
-    const qrCodeRef = ref(storage, `qrcodes/${driverId}.png`);
-    await uploadBytes(qrCodeRef, qrCodeBuffer, { contentType: 'image/png' });
-    const qrCodeUrl = await getDownloadURL(qrCodeRef);
+    const qrCodeFileName = `qrcodes/${driverId}.png`;
+    const qrCodeFileBlob = storage.file(qrCodeFileName);
+    await qrCodeFileBlob.save(qrCodeBuffer, {
+        metadata: { contentType: 'image/png' },
+    });
+    const [qrCodeUrl] = await qrCodeFileBlob.getSignedUrl({
+        action: 'read',
+        expires: '01-01-2500'
+    });
 
     // 5. Update the driver document with the final QR code URL
-    await updateDoc(doc(db, 'drivers', driverId), { qrCodeUrl });
+    await docRef.update({ qrCodeUrl });
 
     // 6. Return success response
     return NextResponse.json({ driverId });
