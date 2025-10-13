@@ -16,13 +16,12 @@ import QRCode from 'qrcode';
 
 export async function registerDriverAction(formData: FormData) {
   try {
-    const data = Object.fromEntries(formData.entries());
-
     // 1. Check for existing vehicle
+    const vehicleRegistrationNumber = formData.get('vehicleRegistrationNumber') as string;
     const driversRef = collection(db, 'drivers');
     const q = query(
       driversRef,
-      where('vehicleRegistrationNumber', '==', data.vehicleRegistrationNumber)
+      where('vehicleRegistrationNumber', '==', vehicleRegistrationNumber)
     );
 
     const querySnapshot = await getDocs(q);
@@ -30,10 +29,10 @@ export async function registerDriverAction(formData: FormData) {
       return { error: 'A vehicle with this registration number already exists.' };
     }
 
-    // 2. Upload passport photo
-    const passportFile = data.passportPhoto as File;
+    // 2. Handle passport photo upload
+    const passportFile = formData.get('passportPhoto') as File;
     if (!passportFile || passportFile.size === 0) {
-        return { error: 'Passport photo is missing or empty.' };
+      return { error: 'Passport photo is missing or empty.' };
     }
     const passportFileBuffer = Buffer.from(await passportFile.arrayBuffer());
     const passportRef = ref(storage, `passports/${Date.now()}_${passportFile.name}`);
@@ -42,15 +41,15 @@ export async function registerDriverAction(formData: FormData) {
 
     // 3. Create driver document (without QR code URL yet)
     const newDriverData = {
-      fullName: data.fullName as string,
-      nin: data.nin as string,
-      phoneNumber: data.phoneNumber as string,
-      email: data.email as string,
-      address: data.address as string,
-      vehicleRegistrationNumber: data.vehicleRegistrationNumber as string,
-      vehicleType: data.vehicleType as string,
-      vehicleColor: data.vehicleColor as string,
-      vehicleModel: data.vehicleModel as string,
+      fullName: formData.get('fullName') as string,
+      nin: formData.get('nin') as string,
+      phoneNumber: formData.get('phoneNumber') as string,
+      email: formData.get('email') as string,
+      address: formData.get('address') as string,
+      vehicleRegistrationNumber: vehicleRegistrationNumber,
+      vehicleType: formData.get('vehicleType') as string,
+      vehicleColor: formData.get('vehicleColor') as string,
+      vehicleModel: formData.get('vehicleModel') as string,
       passportPhotoUrl,
       qrCodeUrl: '', // Placeholder
       registrationDate: Timestamp.now(),
@@ -68,7 +67,7 @@ export async function registerDriverAction(formData: FormData) {
     await uploadBytes(qrCodeRef, qrCodeBuffer, { contentType: 'image/png' });
     const qrCodeUrl = await getDownloadURL(qrCodeRef);
 
-    // 5. Update the driver document with the final QR code URL from storage
+    // 5. Update the driver document with the final QR code URL
     await updateDoc(doc(db, 'drivers', docRef.id), { qrCodeUrl: qrCodeUrl });
 
     return { driverId: docRef.id };
