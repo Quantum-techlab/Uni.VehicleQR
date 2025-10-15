@@ -25,6 +25,8 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { registerDriverClient } from '@/lib/register-driver-client';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 
 const driverSchema = z.object({
   fullName: z.string().min(3, 'Full name must be at least 3 characters.'),
@@ -100,6 +102,11 @@ export default function RegisterDriverPage() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Driver Information</h3>
+              <p className="text-sm text-muted-foreground">Basic details for driver identification.</p>
+            </div>
+            <Separator />
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
               <div className="space-y-8">
                 <FormField
@@ -191,6 +198,10 @@ export default function RegisterDriverPage() {
                 />
               </div>
               <div className="space-y-8">
+               <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">Vehicle Information</h3>
+                  <p className="text-sm text-muted-foreground">Details used to generate and label the QR.</p>
+                </div>
                <FormField
                   control={form.control}
                   name="vehicleRegistrationNumber"
@@ -246,7 +257,13 @@ export default function RegisterDriverPage() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex flex-col items-end gap-4">
+              {loading && (
+                <div className="w-full">
+                  <Progress value={75} />
+                  <p className="mt-1 text-xs text-muted-foreground">Uploading and generating QR code...</p>
+                </div>
+              )}
               <Button type="submit" disabled={loading} size="lg">
                 {loading ? (
                   <>

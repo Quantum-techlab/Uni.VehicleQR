@@ -37,6 +37,7 @@ import { Driver } from '@/lib/types';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { PageHero } from '@/components/layout/PageHero';
 
 type DashboardData = {
   totalDrivers: number;
@@ -79,6 +80,10 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHero
+        title="Dashboard"
+        description="Overview of recent registrations and verifications."
+      />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <motion.div whileHover={{ y: -5, scale: 1.03 }}>
           <Card>
