@@ -73,6 +73,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ driverId }, { status: 201 });
   } catch (err: any) {
     console.error('Register driver failed', err);
-    return NextResponse.json({ error: err?.message || 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: err?.message || 'An internal server error occurred.' }, { status: 500 });
   }
 }
