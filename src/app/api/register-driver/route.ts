@@ -1,6 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db as adminDb, storage as adminStorage } from '@/lib/firebase-admin';
 import QRCode from 'qrcode';
+import { Writable } from 'stream';
+
+/**
+ * Converts a ReadableStream to a Buffer.
+ */
+async function streamToBuffer(readableStream: ReadableStream<Uint8Array>): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  const reader = readableStream.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+    chunks.push(Buffer.from(value));
+  }
+  return Buffer.concat(chunks);
+}
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,14 +35,18 @@ export async function POST(req: NextRequest) {
     const vehicleModel = String(formData.get('vehicleModel') || '');
     const passportPhoto = formData.get('passportPhoto') as File | null;
 
-    if (!fullName || !nin || !phoneNumber || !email || !address || !vehicleRegistrationNumber || !vehicleType || !vehicleColor || !vehicleModel) {
-      return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 });
+    // --- Validation ---
+    const requiredFields = { fullName, nin, phoneNumber, email, address, vehicleRegistrationNumber, vehicleType, vehicleColor, vehicleModel };
+    for (const [key, value] of Object.entries(requiredFields)) {
+        if (!value) {
+            return NextResponse.json({ error: `Missing required field: ${key}.` }, { status: 400 });
+        }
     }
     if (!passportPhoto) {
       return NextResponse.json({ error: 'Passport photo is required.' }, { status: 400 });
     }
 
-    // Uniqueness: ensure vehicleRegistrationNumber is unique
+    // --- Uniqueness Check ---
     const existing = await adminDb
       .collection('drivers')
       .where('vehicleRegistrationNumber', '==', vehicleRegistrationNumber)
@@ -34,27 +56,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'A vehicle with this registration number already exists.' }, { status: 409 });
     }
 
-    // Upload passport photo to Storage
-    const bytes = Buffer.from(await passportPhoto.arrayBuffer());
+    // --- Upload Passport Photo ---
     const passportPath = `passports/${Date.now()}_${passportPhoto.name}`;
     const passportFile = adminStorage.file(passportPath);
-    await passportFile.save(bytes, { contentType: passportPhoto.type, resumable: false });
+    const passportBuffer = Buffer.from(await passportPhoto.arrayBuffer());
+    await passportFile.save(passportBuffer, { contentType: passportPhoto.type });
     const passportPhotoUrl = passportFile.publicUrl();
+    
 
-    // Create driver doc without QR
+    // --- Firestore Document Creation ---
     const newDriverRef = adminDb.collection('drivers').doc();
     const driverId = newDriverRef.id;
 
-    // Generate QR code PNG data URL for driverId
+    // --- QR Code Generation and Upload ---
     const qrCodeDataURL = await QRCode.toDataURL(driverId, { width: 400, margin: 2 });
     const base64 = qrCodeDataURL.split(',')[1];
     const qrBytes = Buffer.from(base64, 'base64');
     const qrPath = `qrcodes/${driverId}.png`;
     const qrFile = adminStorage.file(qrPath);
-    await qrFile.save(qrBytes, { contentType: 'image/png', resumable: false });
+    await qrFile.save(qrBytes, { contentType: 'image/png' });
     const qrCodeUrl = qrFile.publicUrl();
 
-    // Set driver data in Firestore, including the new QR code URL
+    // --- Set Final Driver Data ---
     await newDriverRef.set({
       fullName,
       nin,
@@ -71,8 +94,13 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ driverId }, { status: 201 });
+
   } catch (err: any) {
-    console.error('Register driver failed', err);
-    return NextResponse.json({ error: err?.message || 'An internal server error occurred.' }, { status: 500 });
+    console.error('--- REGISTRATION API ERROR ---', err);
+    // Ensure a JSON response is always sent on failure
+    return NextResponse.json(
+        { error: err.message || 'An internal server error occurred during registration.' }, 
+        { status: 500 }
+    );
   }
 }
