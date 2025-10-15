@@ -38,11 +38,24 @@ export async function POST(req: NextRequest) {
     const bytes = Buffer.from(await passportPhoto.arrayBuffer());
     const passportPath = `passports/${Date.now()}_${passportPhoto.name}`;
     const passportFile = adminStorage.file(passportPath);
-    await passportFile.save(bytes, { contentType: passportPhoto.type, resumable: false, public: true });
-    const [passportPhotoUrl] = await passportFile.getPublicUrl ? [passportFile.getPublicUrl()] : passportFile.getSignedUrl({ action: 'read', expires: '03-01-2500' });
+    await passportFile.save(bytes, { contentType: passportPhoto.type, resumable: false });
+    const passportPhotoUrl = passportFile.publicUrl();
 
     // Create driver doc without QR
-    const newDriverRef = await adminDb.collection('drivers').add({
+    const newDriverRef = adminDb.collection('drivers').doc();
+    const driverId = newDriverRef.id;
+
+    // Generate QR code PNG data URL for driverId
+    const qrCodeDataURL = await QRCode.toDataURL(driverId, { width: 400, margin: 2 });
+    const base64 = qrCodeDataURL.split(',')[1];
+    const qrBytes = Buffer.from(base64, 'base64');
+    const qrPath = `qrcodes/${driverId}.png`;
+    const qrFile = adminStorage.file(qrPath);
+    await qrFile.save(qrBytes, { contentType: 'image/png', resumable: false });
+    const qrCodeUrl = qrFile.publicUrl();
+
+    // Set driver data in Firestore, including the new QR code URL
+    await newDriverRef.set({
       fullName,
       nin,
       phoneNumber,
@@ -53,23 +66,9 @@ export async function POST(req: NextRequest) {
       vehicleColor,
       vehicleModel,
       passportPhotoUrl,
-      qrCodeUrl: '',
+      qrCodeUrl,
       registrationDate: new Date(),
     });
-
-    const driverId = newDriverRef.id;
-
-    // Generate QR code PNG data URL for driverId
-    const dataUrl = await QRCode.toDataURL(driverId, { width: 250, margin: 1 });
-    const base64 = dataUrl.split(',')[1];
-    const qrBytes = Buffer.from(base64, 'base64');
-    const qrPath = `qrcodes/${driverId}.png`;
-    const qrFile = adminStorage.file(qrPath);
-    await qrFile.save(qrBytes, { contentType: 'image/png', resumable: false, public: true });
-    const [qrCodeUrl] = await qrFile.getPublicUrl ? [qrFile.getPublicUrl()] : qrFile.getSignedUrl({ action: 'read', expires: '03-01-2500' });
-
-    // Update driver with qr url
-    await newDriverRef.update({ qrCodeUrl });
 
     return NextResponse.json({ driverId }, { status: 201 });
   } catch (err: any) {
@@ -77,5 +76,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err?.message || 'Internal Server Error' }, { status: 500 });
   }
 }
-
-

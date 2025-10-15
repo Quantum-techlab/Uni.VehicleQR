@@ -24,7 +24,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { registerDriverClient } from '@/lib/register-driver-client';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 
@@ -66,32 +65,41 @@ export default function RegisterDriverPage() {
 
   const onSubmit = async (values: DriverFormValues) => {
     setLoading(true);
-    setProgress(0);
+    setProgress(50); // Indeterminate progress
 
-    const result = await registerDriverClient(values, setProgress);
+    const formData = new FormData();
+    Object.entries(values).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
 
-    if (result.error) {
-      toast({
-        variant: 'destructive',
-        title: 'Registration Failed',
-        description: result.error,
+    try {
+      const response = await fetch('/api/register-driver', {
+        method: 'POST',
+        body: formData,
       });
-    } else if (result.driverId) {
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'An unknown error occurred.');
+      }
+
+      setProgress(100);
       toast({
         title: 'Registration Successful',
         description: 'Driver and vehicle have been registered.',
       });
       router.push(`/drivers/${result.driverId}`);
-    } else {
-        toast({
-            variant: 'destructive',
-            title: 'An Unknown Error Occurred',
-            description: "Could not complete registration.",
-        });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Registration Failed',
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+      setProgress(0);
     }
-
-    setLoading(false);
-    setProgress(0);
   };
   
   return (
@@ -264,7 +272,7 @@ export default function RegisterDriverPage() {
               {loading && (
                 <div className="w-full">
                   <Progress value={progress} />
-                  <p className="mt-1 text-xs text-muted-foreground">Registering... Please wait. ({Math.round(progress)}%)</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Registering... Please wait.</p>
                 </div>
               )}
               <Button type="submit" disabled={loading} size="lg">
