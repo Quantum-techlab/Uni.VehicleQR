@@ -1,13 +1,13 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    match /passports/{fileName} {
+    // Allow read access publicly, which can help with some client-side operations.
+    // Ensure no sensitive files are stored if this is not desired.
+    allow read: if true;
+
+    // Allow authenticated users to write to the passports and qrcodes folders.
+    match /{folder}/{fileName} where folder IN ['passports', 'qrcodes'] {
       allow write: if request.auth != null;
-      allow read: if true;
-    }
-    match /qrcodes/{fileName} {
-      allow write: if request.auth != null;
-      allow read: if true;
     }
   }
 }
