@@ -47,6 +47,8 @@ export default function RegisterDriverPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
   const form = useForm<DriverFormValues>({
     resolver: zodResolver(driverSchema),
     defaultValues: {
@@ -64,9 +66,9 @@ export default function RegisterDriverPage() {
 
   const onSubmit = async (values: DriverFormValues) => {
     setLoading(true);
+    setProgress(0);
 
-    // We no longer need to create FormData manually for the client-side function
-    const result = await registerDriverClient(values);
+    const result = await registerDriverClient(values, setProgress);
 
     if (result.error) {
       toast({
@@ -89,6 +91,7 @@ export default function RegisterDriverPage() {
     }
 
     setLoading(false);
+    setProgress(0);
   };
   
   return (
@@ -260,8 +263,8 @@ export default function RegisterDriverPage() {
             <div className="flex flex-col items-end gap-4">
               {loading && (
                 <div className="w-full">
-                  <Progress value={75} />
-                  <p className="mt-1 text-xs text-muted-foreground">Uploading and generating QR code...</p>
+                  <Progress value={progress} />
+                  <p className="mt-1 text-xs text-muted-foreground">Registering... Please wait. ({Math.round(progress)}%)</p>
                 </div>
               )}
               <Button type="submit" disabled={loading} size="lg">

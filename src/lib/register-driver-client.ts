@@ -1,4 +1,17 @@
-// Server-backed registration via API to avoid client credentials and rules issues
+
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+  Timestamp
+} from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytesResumable, uploadString } from 'firebase/storage';
+import { db, storage } from './firebase';
+import QRCode from 'qrcode';
 
 type DriverData = {
     fullName: string;
@@ -18,30 +31,73 @@ type RegisterDriverResult = {
   error?: string;
 };
 
-export async function registerDriverClient(data: DriverData): Promise<RegisterDriverResult> {
+export async function registerDriverClient(
+  data: DriverData,
+  onProgress: (progress: number) => void
+): Promise<RegisterDriverResult> {
   try {
-    const form = new FormData();
-    form.append('fullName', data.fullName);
-    form.append('nin', data.nin);
-    form.append('passportPhoto', data.passportPhoto);
-    form.append('phoneNumber', data.phoneNumber);
-    form.append('email', data.email);
-    form.append('address', data.address);
-    form.append('vehicleRegistrationNumber', data.vehicleRegistrationNumber);
-    form.append('vehicleType', data.vehicleType);
-    form.append('vehicleColor', data.vehicleColor);
-    form.append('vehicleModel', data.vehicleModel);
+    // 1. Check for duplicate vehicle registration number
+    onProgress(5);
+    const q = query(collection(db, 'drivers'), where('vehicleRegistrationNumber', '==', data.vehicleRegistrationNumber));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      return { error: 'A vehicle with this registration number already exists.' };
+    }
 
-    const res = await fetch('/api/register-driver', {
-      method: 'POST',
-      body: form,
+    // 2. Upload passport photo to Firebase Storage
+    onProgress(10);
+    const passportPhotoPath = `passports/${Date.now()}_${data.passportPhoto.name}`;
+    const passportPhotoRef = ref(storage, passportPhotoPath);
+    
+    const uploadTask = uploadBytesResumable(passportPhotoRef, data.passportPhoto);
+
+    await new Promise<void>((resolve, reject) => {
+        uploadTask.on('state_changed', 
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 50; // Upload is 50% of total job
+                onProgress(10 + progress);
+            },
+            (error) => {
+                console.error("Passport upload failed:", error);
+                reject(new Error(`Image upload failed: ${error.message}`));
+            },
+            () => {
+                resolve();
+            }
+        );
     });
 
-    const json = await res.json();
-    if (!res.ok) {
-      return { error: json?.error || 'Registration failed' };
-    }
-    return { driverId: json.driverId };
+    const passportPhotoUrl = await getDownloadURL(uploadTask.snapshot.ref);
+
+    // 3. Create driver document in Firestore (without QR code URL yet)
+    onProgress(65);
+    const driverDocRef = await addDoc(collection(db, 'drivers'), {
+      ...data,
+      passportPhotoUrl: passportPhotoUrl,
+      passportPhoto: undefined, // Don't store the file object
+      registrationDate: Timestamp.now(),
+      qrCodeUrl: '',
+    });
+
+    const driverId = driverDocRef.id;
+
+    // 4. Generate QR code
+    onProgress(75);
+    const qrCodeDataURL = await QRCode.toDataURL(driverId, { width: 400, margin: 2 });
+    
+    // 5. Upload QR code to Firebase Storage
+    onProgress(85);
+    const qrCodePath = `qrcodes/${driverId}.png`;
+    const qrCodeRef = ref(storage, qrCodePath);
+    await uploadString(qrCodeRef, qrCodeDataURL, 'data_url');
+    const qrCodeUrl = await getDownloadURL(qrCodeRef);
+
+    // 6. Update driver document with QR code URL
+    onProgress(95);
+    await updateDoc(driverDocRef, { qrCodeUrl });
+    
+    onProgress(100);
+    return { driverId };
 
   } catch (error: any) {
     console.error("Client-side registration failed:", error);
