@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { SidebarNav, SidebarHeaderContent } from '@/components/layout/sidebar-nav';
 import { Header } from '@/components/layout/header';
-import { Loader2 } from 'lucide-react';
+import { LoadingScreen } from '@/components/layout/loading-screen';
 
 export default function ProtectedLayout({
   children,
@@ -30,11 +30,7 @@ export default function ProtectedLayout({
   }, [user, loading, router]);
 
   if (loading || !user) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
