@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { registerDriverAction } from '@/actions/register-driver';
+import { registerDriverClient } from '@/lib/register-driver-client';
 
 const driverSchema = z.object({
   fullName: z.string().min(3, 'Full name must be at least 3 characters.'),
@@ -68,7 +68,7 @@ export default function RegisterDriverPage() {
       formData.append(key, value);
     });
 
-    const result = await registerDriverAction(formData);
+    const result = await registerDriverClient(formData);
 
     if (result.error) {
       toast({
