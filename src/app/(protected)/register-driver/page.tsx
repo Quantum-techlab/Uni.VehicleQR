@@ -63,12 +63,8 @@ export default function RegisterDriverPage() {
   const onSubmit = async (values: DriverFormValues) => {
     setLoading(true);
 
-    const formData = new FormData();
-    Object.entries(values).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-
-    const result = await registerDriverClient(formData);
+    // We no longer need to create FormData manually for the client-side function
+    const result = await registerDriverClient(values);
 
     if (result.error) {
       toast({
@@ -252,8 +248,14 @@ export default function RegisterDriverPage() {
 
             <div className="flex justify-end">
               <Button type="submit" disabled={loading} size="lg">
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Register Driver
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Registering...
+                  </>
+                ) : (
+                  'Register Driver'
+                )}
               </Button>
             </div>
           </form>

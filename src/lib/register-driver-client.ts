@@ -1,4 +1,3 @@
-
 import {
   addDoc,
   collection,
@@ -13,31 +12,35 @@ import { getDownloadURL, ref, uploadBytes, uploadString } from 'firebase/storage
 import { db, storage } from '@/lib/firebase';
 import QRCode from 'qrcode';
 
+type DriverData = {
+    fullName: string;
+    nin: string;
+    passportPhoto: File;
+    phoneNumber: string;
+    email: string;
+    address: string;
+    vehicleRegistrationNumber: string;
+    vehicleType: string;
+    vehicleColor: string;
+    vehicleModel: string;
+}
+
 type RegisterDriverResult = {
   driverId?: string;
   error?: string;
 };
 
-export async function registerDriverClient(formData: FormData): Promise<RegisterDriverResult> {
+export async function registerDriverClient(data: DriverData): Promise<RegisterDriverResult> {
   try {
-    const fullName = formData.get('fullName') as string;
-    const nin = formData.get('nin') as string;
-    const phoneNumber = formData.get('phoneNumber') as string;
-    const email = formData.get('email') as string;
-    const address = formData.get('address') as string;
-    const vehicleRegistrationNumber = formData.get('vehicleRegistrationNumber') as string;
-    const vehicleType = formData.get('vehicleType') as string;
-    const vehicleColor = formData.get('vehicleColor') as string;
-    const vehicleModel = formData.get('vehicleModel') as string;
-    const passportFile = formData.get('passportPhoto') as File | null;
-
+    const { passportPhoto: passportFile, ...driverDetails } = data;
+    
     if (!passportFile) {
       return { error: 'Passport photo is missing.' };
     }
 
     // 1. Check for existing vehicle
     const driversRef = collection(db, 'drivers');
-    const q = query(driversRef, where('vehicleRegistrationNumber', '==', vehicleRegistrationNumber));
+    const q = query(driversRef, where('vehicleRegistrationNumber', '==', driverDetails.vehicleRegistrationNumber));
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
       return { error: 'A vehicle with this registration number already exists.' };
@@ -52,15 +55,7 @@ export async function registerDriverClient(formData: FormData): Promise<Register
 
     // 3. Create driver document (without QR code URL yet)
     const newDriverData = {
-      fullName,
-      nin,
-      phoneNumber,
-      email,
-      address,
-      vehicleRegistrationNumber,
-      vehicleType,
-      vehicleColor,
-      vehicleModel,
+      ...driverDetails,
       passportPhotoUrl,
       qrCodeUrl: '', // Placeholder
       registrationDate: Timestamp.now(),
