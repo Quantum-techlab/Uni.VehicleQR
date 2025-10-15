@@ -1,10 +1,10 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Allow public read access for preflight checks to succeed.
+    // Secure write access to ensure only authenticated users can upload.
     match /{allPaths=**} {
-      // Allow public read access to allow CORS preflight requests to succeed.
       allow read;
-      // Restrict write access to only authenticated users.
       allow write: if request.auth != null;
     }
   }
