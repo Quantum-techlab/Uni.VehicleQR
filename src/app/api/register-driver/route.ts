@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db as adminDb, storage as adminStorage } from '@/lib/firebase-admin';
+import { getAdminDb, getAdminStorage } from '@/lib/firebase-admin';
 import QRCode from 'qrcode';
-import { Writable } from 'stream';
 
 /**
  * Converts a ReadableStream to a Buffer.
@@ -22,6 +21,8 @@ async function streamToBuffer(readableStream: ReadableStream<Uint8Array>): Promi
 
 export async function POST(req: NextRequest) {
   try {
+    const adminDb = getAdminDb();
+    const adminStorage = getAdminStorage();
     const formData = await req.formData();
 
     const fullName = String(formData.get('fullName') || '');
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
     const passportFile = adminStorage.file(passportPath);
     const passportBuffer = Buffer.from(await passportPhoto.arrayBuffer());
     await passportFile.save(passportBuffer, { contentType: passportPhoto.type });
-    const passportPhotoUrl = passportFile.publicUrl();
+    const [passportPhotoUrl] = await passportFile.getSignedUrl({ action: 'read', expires: '03-01-2500' });
     
 
     // --- Firestore Document Creation ---
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
     const qrPath = `qrcodes/${driverId}.png`;
     const qrFile = adminStorage.file(qrPath);
     await qrFile.save(qrBytes, { contentType: 'image/png' });
-    const qrCodeUrl = qrFile.publicUrl();
+    const [qrCodeUrl] = await qrFile.getSignedUrl({ action: 'read', expires: '03-01-2500' });
 
     // --- Set Final Driver Data ---
     await newDriverRef.set({
